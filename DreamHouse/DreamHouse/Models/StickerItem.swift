@@ -43,7 +43,7 @@ struct PlacedSticker: Identifiable, Codable, Hashable {
 }
 
 // CGPoint 默认不遵循 Codable，手动扩展
-extension CGPoint: @retroactive Codable {
+extension CGPoint: Codable {
     enum CodingKeys: String, CodingKey {
         case x, y
     }
@@ -63,7 +63,7 @@ extension CGPoint: @retroactive Codable {
 }
 
 // CGPoint 默认不遵循 Hashable，手动扩展（PlacedSticker 需要用到）
-extension CGPoint: @retroactive Hashable {
+extension CGPoint: Hashable {
     public func hash(into hasher: inout Hasher) {
         hasher.combine(x)
         hasher.combine(y)
