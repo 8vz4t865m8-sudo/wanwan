@@ -1,0 +1,42 @@
+name: Build Unsigned IPA
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: macos-14
+
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 显示可用的 Xcode 版本
+        run: xcodebuild -version
+
+      - name: 编译 Archive（不签名）
+        run: |
+          xcodebuild -project DreamHouse.xcodeproj \
+            -scheme DreamHouse \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath $PWD/build/DreamHouse.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            archive
+
+      - name: 从 Archive 提取 .app 并打包成未签名 ipa
+        run: |
+          mkdir -p $PWD/build/Payload
+          cp -r $PWD/build/DreamHouse.xcarchive/Products/Applications/DreamHouse.app $PWD/build/Payload/
+          cd $PWD/build
+          zip -r DreamHouse-unsigned.ipa Payload
+
+      - name: 上传编译产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: DreamHouse-unsigned-ipa
+          path: build/DreamHouse-unsigned.ipa
+          retention-days: 14
